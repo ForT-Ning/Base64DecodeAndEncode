@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	//"unicode/utf8"
 )
 
 //A~Z : 0 ~ 25	"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -45,7 +46,7 @@ func CharToRune(r rune) rune {
 func DecodeString(str string) string {
 	var number int = 0x00
 	var n16 int = 0x0ff
-	var strRet string
+	var b []byte
 	for ii, cc := range str {
 		if cc == '=' {
 			break
@@ -63,18 +64,18 @@ func DecodeString(str string) string {
 		new8 := number >> (6 - (ii%4)*2)
 
 		number = (n16 >> ((ii%4 + 1) * 2)) & number
-		strRet += string(rune(new8))
+
+		b = append(b, byte(new8))
 	}
-	fmt.Println(strRet)
-	return str
+	return string(b)
 }
 
 //加密
-func EncodeString(str string) string {
+func EncodeString(b []byte) string {
 	var n16 int = 0x0ff
 	var nLast int = 0x00
 	var strRet string = ""
-	for ii, ss := range str {
+	for ii, ss := range b {
 		move := (ii%3)*2 + 2
 
 		sum := nLast<<8 + int(ss)
@@ -96,7 +97,7 @@ func EncodeString(str string) string {
 			nLast = 0x00
 		}
 
-		if ii == len([]rune(str))-1 {
+		if ii == len(b)-1 {
 			switch move {
 			case 2:
 				nLast = nLast << 4
@@ -111,10 +112,16 @@ func EncodeString(str string) string {
 			}
 		}
 	}
-	fmt.Println(strRet)
+	//fmt.Println(strRet)
 	return strRet
 }
 
 func main() {
-	DecodeString(EncodeString("DiWang hello"))
+	str := "我是谁"
+	b := []byte(str)
+	enStr := EncodeString(b)
+	fmt.Println(enStr)
+	deStr := DecodeString(enStr)
+	fmt.Println(deStr)
+
 }
